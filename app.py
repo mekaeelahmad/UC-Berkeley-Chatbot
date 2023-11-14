@@ -1,16 +1,20 @@
+from flask import Flask, render_template, request, jsonify
 import openai
-from flask import Flask, request, jsonify
 
 app = Flask(__name__)
-openai.api_key = ''
+openai.api_key = '' # add the API Key here
+
+@app.route('/')
+def index():
+    return render_template('index.html')
 
 @app.route('/ask', methods=['POST'])
 def ask():
     data = request.json
     user_query = data['query']
     response = openai.Completion.create(
-        model="your-custom-assistant-id",  # Use your custom assistant ID
-        prompt=f"Your custom prompt with the user query: {user_query}",
+        model="text-davinci-003",
+        prompt=f"This user has a question related to UC Berkeley's classes. Their query is: {user_query}. [Additional context and URLs]",
         max_tokens=150
     )
     return jsonify(answer=response.choices[0].text.strip())
