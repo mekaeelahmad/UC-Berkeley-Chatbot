@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>UC Berkeley Class Assistant</title>
+</head>
+<body>
+    <h1>Welcome to UC Berkeley Class Assistant</h1>
+    <input type="text" id="userQuery" placeholder="Ask about UC Berkeley classes...">
+    <button onclick="sendQuery()">Ask</button>
+    <div id="response"></div>
+
+    <script>
+        function sendQuery() {
+            var userQuery = document.getElementById('userQuery').value;
+            fetch('/ask', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ query: userQuery }),
+            })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('response').innerText = data.answer;
+            })
+            .catch((error) => {
+                console.error('Error:', error);
+            });
+        }
+    </script>
+</body>
+</html>
