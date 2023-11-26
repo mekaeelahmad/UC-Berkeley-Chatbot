@@ -107,23 +107,19 @@ async function getAPIKeyFromToken(db, token) {
     });
 }
 
-//Concat the user query and the response from OpenAI into a string and concat with the convo string in users table and if the convo is too long then remove the first part of the convo string
-async function updateConvo(db, userQuery, answer, token) {
-    return new Promise((resolve, reject) => {
-        db.get(`SELECT users.convo FROM users INNER JOIN sessionTokens ON sessionTokens.userId = users.id WHERE sessionTokens.token = '${token}'`,(err, row) => {
-            if (err) reject(err.message); // I assume this is how an error is thrown with your db callback
-            if (row) {
-                let convo = row.convo;
-                convo = convo + " Question: " + userQuery + "Answer: " + answer;
-                if (convo.length > 30000) {
-                    convo = convo.substring(convo.length - 10000);
-                }
-                db.run(`UPDATE users SET convo = '${convo}' WHERE id = '${row.id}'`);
-            }
-            resolve(row.convo);
-        });
+
+
+//reset convo
+app.post('/reset', (req, res) => {
+    const token = req.query.token;
+    db.run(`UPDATE users SET convo = '' WHERE id = (SELECT userId FROM sessionTokens WHERE token = '${token}')`, (err) => {
+        if (err) {
+            console.error(err.message);
+            res.status(500).json({ error: 'Internal Server Error' });
+        }
+        res.json({ success: 'Conversation reset' });
     });
-}
+});
 
 app.post('/ask', async (req, res) => {
     const token = req.query.token;
@@ -142,12 +138,28 @@ app.post('/ask', async (req, res) => {
                 max_tokens: 60,
             });
         answer = response.choices[0].text.trim()
-        const update = await updateConvo(db, userQuery, answer, token);
-        res.json({ answer: "Answer: " + answer, update: update});
+        res.json({ answer: "Answer: " + answer });
     } catch (error) {
         console.error('Error making OpenAI API request:', error.message);
         res.status(500).json({ error: 'Internal Server Error' });
     }
+    const update = new Promise((resolve, reject) => {
+        resolve('Success');
+    });
+    await update.then(() => {
+        db.get(`SELECT users.convo FROM users INNER JOIN sessionTokens ON sessionTokens.userId = users.id WHERE sessionTokens.token = '${token}'`,(err, row) => {
+            if (err) {
+                return res.status(500).json({ error: "cannot update conversation!" });
+            }
+            if (row) {
+            let convo = row.convo;
+            convo = convo + " Question: " + userQuery + "Answer: " + answer;
+            if (convo.length > 30000) {
+                convo = convo.substring(convo.length - 10000);
+            }
+            db.run(`UPDATE users SET convo = '${convo}' WHERE id = '${row.id}'`)};
+        });
+    });
 });
 
 app.listen(3004, () => {
