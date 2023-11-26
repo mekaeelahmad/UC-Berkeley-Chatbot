@@ -1,6 +1,8 @@
 import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
 import './globals.css'
+import { ClerkProvider, SignInButton, SignedIn, SignedOut, UserButton } from '@clerk/nextjs'
+
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -11,6 +13,7 @@ export const metadata: Metadata = {
 
 // components/Layout.js
 import React, { ReactNode } from 'react';
+import Link from 'next/link';
 
 interface LayoutProps {
     children: ReactNode;
@@ -18,24 +21,36 @@ interface LayoutProps {
 
 const Layout: React.FC<LayoutProps> = ({ children }) => {
     return (
-        <div className="flex flex-col h-screen">
-            <Navbar></Navbar>
-            <main className="flex-1 p-4">{children}</main>
-        </div>
+        <ClerkProvider>
+            <div className="flex flex-col h-screen">
+                <Navbar></Navbar>
+                <main className="flex-1 p-4">{children}</main>
+            </div>
+        </ClerkProvider>
     );
 };
+
 
 const Navbar : any = () => {
     let  textColor : string = "text-blue-950";
     return (
         <>
             <header className="bg-white p-4">
+
                 <nav className="flex items-center justify-between">
                     <div className={textColor + " font-bold"}>Bear Advisor Scheduler</div>
                     <div className="space-x-8">
                         <a href="#" className={textColor}>About</a>
-                        <a href="#" className={textColor}>Sign in</a>
-                        <a href="#" className={textColor}>Log in</a>
+                        <a href="user-profile" className={textColor}>Profile</a>
+                        <SignedIn>
+                            {/* Mount the UserButton component */}
+                            <UserButton defaultOpen={true} />
+                        </SignedIn>
+                        <SignedOut>
+                            {/* Signed out users get sign in button */}
+                            <SignedIn />
+                        </SignedOut>
+
                     </div>
                 </nav>
             </header>
