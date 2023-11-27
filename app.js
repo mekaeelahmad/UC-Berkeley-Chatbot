@@ -138,28 +138,34 @@ app.post('/ask', async (req, res) => {
                 max_tokens: 60,
             });
         answer = response.choices[0].text.trim()
-        res.json({ answer: "Answer: " + answer });
     } catch (error) {
         console.error('Error making OpenAI API request:', error.message);
         res.status(500).json({ error: 'Internal Server Error' });
     }
-    const update = new Promise((resolve, reject) => {
-        resolve('Success');
-    });
-    await update.then(() => {
-        db.get(`SELECT users.convo FROM users INNER JOIN sessionTokens ON sessionTokens.userId = users.id WHERE sessionTokens.token = '${token}'`,(err, row) => {
+    db.get(`SELECT users.convo, users.id FROM users INNER JOIN sessionTokens ON sessionTokens.userId = users.id WHERE sessionTokens.token = '${token}'`,(err, row) => {
+        if (err) {
+            return res.status(500).json({ error: "cannot update conversation!" });
+        }
+        if (row) {
+        console.log({ row })
+        let convo = row.convo || "";
+        convo = convo + " Question: " + userQuery + "Answer: " + answer;
+        if (convo.length > 30000) {
+            convo = convo.substring(convo.length - 10000);
+        }
+        db.run(`UPDATE users SET convo = ? WHERE id = ?`, [convo, row.id], (err) => {
             if (err) {
-                return res.status(500).json({ error: "cannot update conversation!" });
+                console.error(err.message);
+                console.log("cannot update conversation!");
             }
-            if (row) {
-            let convo = row.convo;
-            convo = convo + " Question: " + userQuery + "Answer: " + answer;
-            if (convo.length > 30000) {
-                convo = convo.substring(convo.length - 10000);
-            }
-            db.run(`UPDATE users SET convo = '${convo}' WHERE id = '${row.id}'`)};
+            console.log("conversation updated");
+            console.log("user: " + row.id)
+            res.json({ answer: "Answer: " + answer });
         });
-    });
+        } else {
+            console.log("no convo found");
+        }
+    }); 
 });
 
 app.listen(3004, () => {
