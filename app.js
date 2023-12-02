@@ -30,7 +30,7 @@ db.run('CREATE TABLE IF NOT EXISTS sessionTokens (id INTEGER PRIMARY KEY AUTOINC
     console.log('Created sessionTokens table.');
 });
 
-//Log in
+//Log in return token and convo
 app.post('/login', (req, res) => {
     const email = req.query.email;
     const password = req.query.password;
@@ -69,7 +69,7 @@ app.post('/signup', (req, res) => {
     });
 });
 
-//Change API Key
+//Change API Key, feed in api key to  change
 app.post('/changeAPIKey', (req, res) => {
     const token = req.query.token;
     const apiKey = req.query.apiKey;
@@ -121,6 +121,7 @@ app.post('/reset', (req, res) => {
     });
 });
 
+//return answer to user query
 app.post('/ask', async (req, res) => {
     const token = req.query.token;
     const userQuery = req.query.query;
