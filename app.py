@@ -19,6 +19,5 @@ def ask():
     )
     return jsonify(answer=response.choices[0].text.strip())
 
-#sdad
 if __name__ == '__main__':
     app.run(debug=True)

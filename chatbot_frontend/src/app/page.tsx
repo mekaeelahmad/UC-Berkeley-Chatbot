@@ -20,6 +20,7 @@ AnswererText = ({children}) => {
         </>
     );
 };
+
 export default function Home() {
   return (
       <main>
