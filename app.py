@@ -1,8 +1,9 @@
 from flask import Flask, render_template, request, jsonify
+from flask_cors import CORS
 import openai
 
 app = Flask(__name__)
-openai.api_key = '' # add the API Key here
+openai.api_key = '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' # add the API Key here
 
 @app.route('/')
 def index():
