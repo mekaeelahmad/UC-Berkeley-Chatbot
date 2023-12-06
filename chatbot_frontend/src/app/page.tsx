@@ -30,7 +30,7 @@ const Home: React.FC = () => {
     e.preventDefault();
 
     try {
-      const response = await fetch('/api/ask', {
+      const response = await fetch('././', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -69,8 +69,7 @@ const Home: React.FC = () => {
         </form>
         <div className={'border rounded-2xl w-3/5 flex flex-col space-x-4 p-4 justify-center'}>
           <div className={'text-xl self-center'}>Previous questions / answers</div>
-          {response}
-          {/* {response && <AnswererText>{response}</AnswererText>} */}
+          {response && <AnswererText>{response}</AnswererText>}
 
           {/* Add more responses as needed */}
         </div>
